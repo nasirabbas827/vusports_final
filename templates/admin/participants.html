@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% block title %}Manage Participants{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Participant Management</h3>
+        <span class="badge badge-secondary">Total: {{ participants|length }}</span>
+    </div>
+
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Name</th>
+                            <th>VU ID</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in participants %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <img src="{{ url_for('static', filename=p[4] or 'images/default_avatar.png') }}" 
+                                         class="rounded-circle mr-3" width="40" height="40" alt="">
+                                    <div>
+                                        <strong>{{ p[2] }}</strong><br>
+                                        <small class="text-muted">Joined {{ p[10].strftime('%b %d, %Y') }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><code>{{ p[1] }}</code></td>
+                            <td>
+                                <span class="badge badge-pill 
+                                    {% if p[9] == 'active' %}badge-success
+                                    {% elif p[9] == 'suspended' %}badge-danger
+                                    {% else %}badge-warning{% endif %}">
+                                    {{ p[9]|capitalize }}
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary mr-2" 
+                                        data-toggle="modal" 
+                                        data-target="#participantModal{{ p[0] }}">
+                                    View Profile
+                                </button>
+
+                                <form action="{{ url_for('admin_update_participant_status', participant_id=p[0]) }}" 
+                                      method="POST" class="d-inline">
+                                    <select name="status" 
+                                            onchange="this.form.submit()" 
+                                            class="form-control form-control-sm d-inline-block w-auto">
+                                        <option value="pending"    {% if p[9]=='pending'    %}selected{% endif %}>Pending</option>
+                                        <option value="active"     {% if p[9]=='active'     %}selected{% endif %}>Active</option>
+                                        <option value="suspended"  {% if p[9]=='suspended'  %}selected{% endif %}>Suspended</option>
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="participantModal{{ p[0] }}" tabindex="-1" role="dialog" 
+                             aria-labelledby="participantLabel{{ p[0] }}" aria-hidden="true">
+                            <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="participantLabel{{ p[0] }}">
+                                            {{ p[2] }} - Participant Profile
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="row">
+                                            <div class="col-md-4 text-center">
+                                                <img src="{{ url_for('static', filename=p[4] or 'images/default_avatar.png') }}" 
+                                                     class="rounded-circle img-fluid mb-3" 
+                                                     style="width: 160px; height: 160px; object-fit: cover;">
+                                                <h5>{{ p[2] }}</h5>
+                                                <p class="text-muted"><code>{{ p[1] }}</code></p>
+                                            </div>
+                                            <div class="col-md-8">
+                                                <h6 class="mt-2 mb-3 border-bottom pb-2">About</h6>
+                                                <p>{{ p[5] or 'No bio provided.' }}</p>
+
+                                                <div class="row mt-4">
+                                                    <div class="col-6">
+                                                        <strong>Sports Preferences:</strong>
+                                                        <p class="text-muted">{{ p[6] or '—' }}</p>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <strong>Past Participation:</strong>
+                                                        <p class="text-muted">{{ p[7] or 'None listed' }}</p>
+                                                    </div>
+                                                </div>
+
+                                                <div class="mt-3">
+                                                    <strong>Achievements:</strong>
+                                                    <p class="text-muted">{{ p[8] or 'No achievements added yet.' }}</p>
+                                                </div>
+
+                                                <div class="mt-3">
+                                                    <strong>Email:</strong>
+                                                    <p class="text-muted">{{ p[3] }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        {% if participants|length == 0 %}
+                        <tr><td colspan="4" class="text-center py-4 text-muted">No participants found.</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

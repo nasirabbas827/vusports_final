@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% block title %}Manage Sports{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Sports Management</h3>
+        <button class="btn btn-primary" data-toggle="modal" data-target="#addSportModal">
+            <i class="fas fa-plus mr-2"></i> Add New Sport
+        </button>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Sport Name</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sport in sports %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>
+                                <strong>{{ sport[1] }}</strong>
+                            </td>
+                            <td>
+                                <p class="mb-0 text-muted" style="max-width: 400px;">
+                                    {{ sport[2] or 'No description provided.' }}
+                                </p>
+                            </td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary mr-2" 
+                                        data-toggle="modal" 
+                                        data-target="#editSportModal{{ sport[0] }}">
+                                    Edit
+                                </button>
+
+                                <form action="{{ url_for('admin_sport_delete', sport_id=sport[0]) }}" 
+                                      method="POST" class="d-inline" 
+                                      onsubmit="return confirm('Are you sure you want to delete {{ sport[1] }}?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        Delete
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+
+                        <!-- Edit Modal -->
+                        <div class="modal fade" id="editSportModal{{ sport[0] }}" tabindex="-1" role="dialog" 
+                             aria-labelledby="editLabel{{ sport[0] }}" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="editLabel{{ sport[0] }}">
+                                            Edit Sport: {{ sport[1] }}
+                                        </h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <form action="{{ url_for('admin_sport_edit', sport_id=sport[0]) }}" method="POST">
+                                        <div class="modal-body">
+                                            <div class="form-group">
+                                                <label for="sport_name_{{ sport[0] }}">Sport Name</label>
+                                                <input type="text" class="form-control" 
+                                                       id="sport_name_{{ sport[0] }}" name="sport_name" 
+                                                       value="{{ sport[1] }}" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="description_{{ sport[0] }}">Description</label>
+                                                <textarea class="form-control" 
+                                                          id="description_{{ sport[0] }}" 
+                                                          name="description" rows="4">{{ sport[2] or '' }}</textarea>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                            <button type="submit" class="btn btn-primary">Save Changes</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        {% if sports|length == 0 %}
+                        <tr>
+                            <td colspan="4" class="text-center py-4 text-muted">
+                                No sports found. Add your first sport!
+                            </td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add New Sport Modal -->
+    <div class="modal fade" id="addSportModal" tabindex="-1" role="dialog" aria-labelledby="addSportLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addSportLabel">Add New Sport</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ url_for('admin_sport_add') }}" method="POST">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="new_sport_name">Sport Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="new_sport_name" name="sport_name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="new_description">Description</label>
+                            <textarea class="form-control" id="new_description" name="description" rows="4"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Add Sport</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

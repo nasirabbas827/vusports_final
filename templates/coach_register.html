@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="card mx-auto border-0 shadow-lg" style="max-width: 550px; border-radius: 20px; overflow: hidden;">
+        <div class="card-header bg-dark text-white text-center py-4">
+            <h3 class="mb-0 font-weight-bold text-white">Coach Registration</h3>
+            <p class="small opacity-75 mb-0">Join our athletic community as a mentor</p>
+        </div>
+        <div class="card-body p-4 p-md-5 bg-white">
+            <form method="POST" enctype="multipart/form-data">
+                <div class="form-group mb-4">
+                    <label for="coach_name" class="font-weight-600"><i class="fas fa-user-tie mr-2 text-primary"></i>Full Name</label>
+                    <input type="text" id="coach_name" name="coach_name" class="form-control form-control-lg shadow-sm" placeholder="e.g. John Doe" required>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="email" class="font-weight-600"><i class="fas fa-envelope mr-2 text-primary"></i>Email Address</label>
+                    <input type="email" id="email" name="email" class="form-control form-control-lg shadow-sm" placeholder="name@example.com" required>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="password" class="font-weight-600"><i class="fas fa-lock mr-2 text-primary"></i>Create Password</label>
+                    <input type="password" id="password" name="password" class="form-control form-control-lg shadow-sm" placeholder="••••••••" required>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="sport_id" class="font-weight-600"><i class="fas fa-running mr-2 text-primary"></i>Assigned Sport</label>
+                    <select id="sport_id" name="sport_id" class="form-control form-control-lg shadow-sm" required style="cursor: pointer;">
+                        <option value="" disabled selected>Select a sport to coach</option>
+                        {% for s in sports %}
+                            <option value="{{ s[0] }}">{{ s[1] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="bio" class="font-weight-600"><i class="fas fa-address-card mr-2 text-primary"></i>Professional Bio</label>
+                    <textarea id="bio" name="bio" class="form-control shadow-sm" rows="4" placeholder="Tell us about your coaching experience..." required></textarea>
+                </div>
+
+                <button class="btn btn-primary btn-lg w-100 shadow mt-3 py-3" style="border-radius: 12px; font-size: 1.1rem;">
+                    Complete Registration <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </form>
+            <div class="text-center mt-4">
+                <p class="text-muted small">Already registered? <a href="{{ url_for('coach_login') }}" class="text-primary font-weight-bold">Login here</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% block title %}Coach Dashboard | VU Sports{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-5 px-md-5">
+    
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm overflow-hidden" style="border-radius: 20px;">
+                <div class="card-body p-0">
+                    <div class="row no-gutters">
+                        <div class="col-md-8 p-4 p-md-5">
+                            <h2 class="fw-bold mb-1" style="color: #1e1e2f;">Welcome, Coach {{ coach_name }}!</h2>
+                            <p class="text-muted mb-0">Manage your athletes and review team sport registrations below.</p>
+                        </div>
+                        <div class="col-md-4 d-none d-md-flex align-items-center justify-content-center" style="background: #f8f9fa;">
+                            <div class="text-center p-3">
+                                <span class="badge badge-soft-primary px-4 py-2" style="font-size: 0.9rem; border-radius: 50px;">
+                                    <i class="fas fa-calendar-check mr-2"></i> {{ "Jan 2026 Session" }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-xl-6 mb-4">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 20px;">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h4 class="font-weight-bold" style="color: #004d4d;">
+                        <i class="fas fa-user-check mr-2 text-primary"></i>Account Verification
+                    </h4>
+                    <p class="small text-muted">Verify student identities and general participation status.</p>
+                </div>
+                <div class="card-body px-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light small text-uppercase font-weight-bold">
+                                <tr>
+                                    <th class="pl-4">Athlete</th>
+                                    <th>VU ID</th>
+                                    <th>Status</th>
+                                    <th class="pr-4 text-center">Update</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in participants %}
+                                <tr>
+                                    <td class="pl-4">
+                                        <div class="font-weight-bold">{{ p[1] }}</div>
+                                        <div class="small text-muted">{{ p[3] }}</div>
+                                    </td>
+                                    <td><code class="text-primary">{{ p[2] }}</code></td>
+                                    <td>
+                                        <span class="badge badge-pill 
+                                            {% if p[4]=='active' %}badge-soft-success
+                                            {% elif p[4]=='suspended' %}badge-soft-danger
+                                            {% else %}badge-soft-warning{% endif %} px-3 py-2">
+                                            {{ p[4]|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td class="pr-4">
+                                        <form method="POST" action="{{ url_for('update_participant_registration', participant_id=p[0]) }}" class="d-flex align-items-center justify-content-center">
+                                            <select name="status" class="custom-select custom-select-sm border-0 bg-light mr-2" style="width: 100px; border-radius: 8px;">
+                                                <option value="pending" {% if p[4]=='pending' %}selected{% endif %}>Pending</option>
+                                                <option value="active" {% if p[4]=='active' %}selected{% endif %}>Active</option>
+                                                <option value="suspended" {% if p[4]=='suspended' %}selected{% endif %}>Suspend</option>
+                                            </select>
+                                            <button class="btn btn-primary btn-sm rounded-circle shadow-sm">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% if not participants %}
+                        <div class="text-center py-5">
+                            <p class="text-muted">No participants found.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 mb-4">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 20px;">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h4 class="font-weight-bold" style="color: #004d4d;">
+                        <i class="fas fa-trophy mr-2 text-warning"></i>Sport-Specific Approvals
+                    </h4>
+                    <p class="small text-muted">Review students trying out for specific sport teams.</p>
+                </div>
+                <div class="card-body">
+                    {% for sport in sports %}
+                    <div class="mb-4">
+                        <h6 class="text-uppercase small font-weight-bold text-primary mb-3">{{ sport[1] }} Tryouts</h6>
+                        <div class="table-responsive bg-light rounded shadow-sm border p-2">
+                            <table class="table table-sm table-borderless align-middle mb-0">
+                                <thead>
+                                    <tr class="text-muted small">
+                                        <th>Name</th>
+                                        <th>Status</th>
+                                        <th class="text-right pr-2">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for req in sport_requests[sport[0]] %}
+                                    <tr class="border-bottom">
+                                        <td>
+                                            <div class="font-weight-bold small">{{ req[1] }}</div>
+                                            <div class="text-muted" style="font-size: 0.75rem;">{{ req[2] }}</div>
+                                        </td>
+                                        <td>
+                                            <span class="small {% if req[4]=='approved' %}text-success{% elif req[4]=='rejected' %}text-danger{% else %}text-warning{% endif %} font-weight-bold">
+                                                ● {{ req[4]|capitalize }}
+                                            </span>
+                                        </td>
+                                        <td class="text-right pr-2">
+                                            <form method="POST" action="{{ url_for('update_participant_status', request_id=req[0]) }}" class="d-inline-flex">
+                                                <select name="status" class="form-control-sm border-0 mr-1" style="font-size: 0.75rem;">
+                                                    <option value="pending" {% if req[4]=='pending' %}selected{% endif %}>Wait</option>
+                                                    <option value="approved" {% if req[4]=='approved' %}selected{% endif %}>Approve</option>
+                                                    <option value="rejected" {% if req[4]=='rejected' %}selected{% endif %}>Reject</option>
+                                                </select>
+                                                <button class="btn btn-outline-primary btn-sm border-0">
+                                                    <i class="fas fa-save"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% if not sport_requests[sport[0]] %}
+                            <p class="small text-center text-muted py-3 mb-0">No active requests for {{ sport[1] }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Status Badge Soft Colors */
+    .badge-soft-success { background-color: #e6fffa; color: #234e52; }
+    .badge-soft-danger { background-color: #fff5f5; color: #822727; }
+    .badge-soft-warning { background-color: #fffaf0; color: #7b341e; }
+    .badge-soft-primary { background-color: #ebf4ff; color: #2c5282; }
+
+    .table td { vertical-align: middle; }
+    .custom-select:focus { box-shadow: none; border-color: #cbd5e0; }
+    
+    /* Hover effects for the Save/Check buttons */
+    .btn-primary.rounded-circle:hover {
+        transform: scale(1.1);
+        background-color: #3182ce;
+    }
+</style>
+{% endblock %}
